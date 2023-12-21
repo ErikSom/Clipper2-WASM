@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Clipper2Z - UMD - Example Basic</title>
+	<script src="../drawPath.js"></script>
+	<script src="../../dist/umd/clipper2z.js"></script>
+</head>
+<body>
+	<script>
+		Clipper2ZFactory().then((Clipper2Z) => {
+			initCanvas(500, 500);
+
+			/* C++:
+			Paths64 subject, clip, solution;
+			subject.push_back(MakePath({100, 50, 10, 79, 65, 2, 65, 98, 10, 21}));
+			clip.push_back(MakePath({98, 63, 4, 68, 77, 8, 52, 100, 19, 12}));
+			solution = Intersect(subject, clip, FillRule::NonZero);
+			*/
+
+			const { MakePath64, Paths64, FillRule, Intersect64 } = Clipper2Z;
+			const subject = new Paths64();
+			const clip = new Paths64();
+			subject.push_back(MakePath64([100, 50, 10, 79, 65, 2, 65, 98, 10, 21]));
+			clip.push_back(MakePath64([98, 63, 4, 68, 77, 8, 52, 100, 19, 12]));
+			const solution = Intersect64(subject, clip, FillRule.NonZero);
+
+			// comment out the draw subject and clip to see the solution only
+			drawPaths(subject, 'green');
+			drawPaths(clip, 'red');
+
+			drawPaths(solution, 'blue');
+
+			/** Or with 32 bit coordinates: */
+			/*
+			const { MakePathD, PathsD, FillRule, IntersectD } = Clipper2Z;
+			const subject = new PathsD();
+			const clip = new PathsD();
+			subject.push_back(MakePathD([100, 50, 10, 79, 65, 2, 65, 98, 10, 21]));
+			clip.push_back(MakePathD([98, 63, 4, 68, 77, 8, 52, 100, 19, 12]));
+			const solution = IntersectD(subject, clip, FillRule.NonZero, 2);
+
+			// comment out the draw subject and clip to see the solution only
+			drawPaths(subject, 'green');
+			drawPaths(clip, 'red');
+
+			drawPaths(solution, 'blue');
+			*/
+		});
+	</script>
+</body>
+</html>

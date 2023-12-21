@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Clipper2Z - UMD - Example SVG Tools</title>
+	<script src="../drawPath.js"></script>
+	<script src="../../dist/umd/clipper2z.js"></script>
+	<script src="../../dist/umd/clipper2z-utils.js"></script>
+</head>
+<body>
+	<script>
+		const promises = [
+			Clipper2ZFactory(),
+			Clipper2ZUtilsFactory(),
+		];
+
+		/* C++:
+		SvgReader svg_reader;
+		svg_reader.LoadFromFile("./rabbit.svg");
+		PathsD p = svg_reader.GetPaths(), solution;
+
+		while (p.size())
+		{
+			//copy each iteration of 'p' into solution until 'p' is no more
+			solution.reserve(solution.size() + p.size());
+			copy(p.begin(), p.end(), back_inserter(solution));
+
+			p = InflatePaths(p, -2.5, JoinType::Round, EndType::Polygon);
+			p = SimplifyPaths(p, 0.025);
+		}
+
+		SvgAddSolution(svg, solution, false);
+		SvgSaveToFile(svg, "rabbit_offset.svg", 338, 540, 0);
+  		*/
+
+		Promise.all(promises).then(([Clipper2Z, Clipper2ZUtils]) => {
+			fetch('../rabbit.svg')
+			.then(response => response.arrayBuffer())
+			.then(data => {
+				initCanvas(600, 600);
+
+				// * NOTE * since both Clipper2Z and Clipper2ZUtils
+				// have their own internal Paths64 & PathsD classes,
+				// we need to convert between them using the following functions:
+				// PathsDToPaths64 and Paths64ToPathsD (see below)
+				// Make sure to import from the correct library from which you want to convert to
+
+				const {SvgReader, SvgWriter, SvgAddSolution, FillRule, Paths64ToPathsD} = Clipper2ZUtils;
+				// Create a Uint8Array from the response data
+				const uint8Data = new Uint8Array(data);
+
+				// Write the data to Emscripten's file system
+				const fs = Clipper2ZUtils.FS;
+				fs.writeFile('/rabbit.svg', uint8Data);
+
+				const reader = new SvgReader();
+				reader.LoadFromFile('/rabbit.svg');
+
+				const pathsD = reader.GetPaths();
+
+				drawPaths(pathsD, 'blue');
+
+				const { Paths64, InflatePaths64, SimplifyPaths64, JoinType, EndType, PathsDToPaths64 } = Clipper2Z;
+
+				const paths64 = PathsDToPaths64(pathsD);
+
+				let p = paths64;
+				const solution = new Paths64();
+
+				while (p.size())
+				{
+					//copy each iteration of 'p' into solution until 'p' is no more
+					for (let i = 0; i < p.size(); ++i)
+					{
+						solution.push_back(p.get(i));
+					}
+
+					p = InflatePaths64(p, -5, JoinType.Round, EndType.Polygon, 2, 0);
+					p = SimplifyPaths64(p, 0.025, true);
+				}
+
+				drawPaths(solution, 'red');
+
+				const svg = new SvgWriter();
+				SvgAddSolution(svg, Paths64ToPathsD(solution), FillRule.NonZero, false);
+				svg.SaveToFile("rabbit_offset.svg", 338, 540, 0);
+
+				// download the svg from emscripten's file system
+				const svgData = fs.readFile('rabbit_offset.svg', { encoding: 'utf8' });
+				const url = 'data:image/svg+xml;base64,' + btoa(svgData);
+
+				const button = document.createElement('button');
+				button.innerHTML = 'Download SVG';
+				button.onclick = () => {
+					const a = document.createElement('a');
+					a.href = url;
+					a.download = 'rabbit_offset.svg';
+					a.click();
+				};
+				document.body.appendChild(button);
+  			});
+		});
+	</script>
+</body>
+</html>

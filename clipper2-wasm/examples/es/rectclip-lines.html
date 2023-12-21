@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Clipper2Z - ES6 - Example Minkowski</title>
+	<script src="../drawPath.js"></script>
+</head>
+<body>
+	<script type="module">
+		import Clipper2ZFactory from '../../dist/es/clipper2z.js';
+
+		Clipper2ZFactory().then((Clipper2Z) => {
+			initCanvas(500, 500);
+
+			const { MakePath64, Rect64, Paths64, TranslatePath64, RectClipLinesPaths64 } = Clipper2Z;
+			const linesPoints = [];
+			for (let i = 0; i < 100; ++i)
+			{
+				linesPoints.push(Math.floor(Math.random() * 400));
+			}
+
+			const subject = new Paths64();
+			subject.push_back(MakePath64(linesPoints));
+
+
+			const width = 400, height = 400, margin = Math.round(400 / 6); // need to round to int
+			const rect = new Rect64(BigInt(margin), BigInt(margin), BigInt(width - margin), BigInt(height - margin));
+
+			drawPaths(subject, 'red', false);
+
+			const start = performance.now();
+			const solution = RectClipLinesPaths64(rect, subject);
+			const end = performance.now();
+			drawText(`Time: ${end - start} ms`, 10, 450, 'black');
+
+			drawPaths(solution, 'green');
+		});
+	</script>
+</body>
+</html>

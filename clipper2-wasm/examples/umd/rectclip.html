@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Clipper2Z - UMD - Example Minkowski</title>
+	<script src="../drawPath.js"></script>
+	<script src="../../dist/umd/clipper2z.js"></script>
+</head>
+<body>
+	<script>
+		Clipper2ZFactory().then((Clipper2Z) => {
+			initCanvas(500, 500);
+
+			/* C++:
+			Path64 shapes[3]; // 3 shapes => +, T, C
+			shapes[0] = MakePath({-10,-10, -10,-30, 10,-30, 10,-10,	30,-10, 30,10, 10,10, 10,30, -10,30, -10,10, -30,10, -30,-10});
+			shapes[1] = MakePath({-10,30, -10,-10, -30,-10, -30,-30, 30,-30, 30,-10, 10,-10, 10,30});
+			shapes[2] = MakePath({-30,-30, 30,-30, 30,-10, -10,-10, -10,10, 30,10, 30,30, -30,30});
+			const int shape_cnt = 10000;
+			const int width = 400, height = 400, margin = 400 /6;
+			Rect64 rect = Rect64(margin, margin, width - margin, height - margin);
+			Paths64 subject;
+			subject.reserve(shape_cnt);
+			for (int i = 0; i < shape_cnt; ++i)
+			{
+				subject.push_back(translatePath(
+				shapes[rand() % 3], 30 + rand(width -30),
+				30 + rand(height -30)));
+			}
+			Paths64 solution = RectClip(rect, subject);
+			*/
+
+			const { MakePath64, Rect64, Paths64, TranslatePath64, RectClipPaths64 } = Clipper2Z;
+			const shapes = [
+				MakePath64([-10,-10, -10,-30, 10,-30, 10,-10, 30,-10, 30,10, 10,10, 10,30, -10,30, -10,10, -30,10, -30,-10]),
+				MakePath64([-10,30, -10,-10, -30,-10, -30,-30, 30,-30, 30,-10, 10,-10, 10,30]),
+				MakePath64([-30,-30, 30,-30, 30,-10, -10,-10, -10,10, 30,10, 30,30, -30,30])
+			];
+			const shape_cnt = 1000;
+			const width = 400, height = 400, margin = Math.round(400 / 6); // need to round to int
+			const rect = new Rect64(BigInt(margin), BigInt(margin), BigInt(width - margin), BigInt(height - margin));
+
+			const subject = new Paths64();
+			for (let i = 0; i < shape_cnt; ++i)
+			{
+				subject.push_back(TranslatePath64(
+				shapes[Math.floor(Math.random() * 3)], BigInt(30 + Math.floor(Math.random() * (width -30))),
+				BigInt(30 + Math.floor(Math.random() * (height -30)))));
+
+				drawPath(subject.get(i), 'red');
+			}
+
+			const start = performance.now();
+			const solution = RectClipPaths64(rect, subject);
+			const end = performance.now();
+			drawText(`Time: ${end - start} ms`, 10, 450, 'black');
+
+			drawPaths(solution, 'green');
+		});
+	</script>
+</body>
+</html>

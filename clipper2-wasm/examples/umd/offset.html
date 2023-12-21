@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Clipper2Z - UMD - Example Offset</title>
+	<script src="../drawPath.js"></script>
+	<script src="../../dist/umd/clipper2z.js"></script>
+</head>
+<body>
+	<script>
+		Clipper2ZFactory().then((Clipper2Z) => {
+			initCanvas(500, 500);
+
+			const { MakePath64, Paths64, InflatePaths64, JoinType, EndType } = Clipper2Z;
+			const subject = new Paths64();
+			subject.push_back(MakePath64([150, 100, 60, 129, 115, 52, 115, 148, 60, 71]));
+
+			drawPaths(subject, 'green');
+
+			const inflated = InflatePaths64(subject, 10, JoinType.Square, EndType.Polygon, 2, 0);
+
+			drawPaths(inflated, 'purple');
+
+		});
+	</script>
+</body>
+</html>
