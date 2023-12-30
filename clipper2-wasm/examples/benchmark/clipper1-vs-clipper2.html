@@ -25,12 +25,12 @@
 				},
 				{ name: "clipper2",
 				  clipper: Clipper2Z,
-				},
+				}
 			]
 
 			for (const benchmark of [
 				{ ops: 5000, points: 5000 },
-				// { ops: 10000, points: 100 },
+				{ ops: 10000, points: 100 },
 			]) {
 
 				const poly1 = circlePath({ x: 1000, y: 1000 }, 1000, benchmark.points);
@@ -40,10 +40,10 @@
 				const poly1ArrayInt = poly1.map((p) => [p.x, p.y]).flat();
 				const poly2ArrayInt = poly2.map((p) => [p.x, p.y]).flat();
 
-				const poly1Paths = new Clipper2Z.PathsD();
-				const poly2Paths = new Clipper2Z.PathsD();
-				poly1Paths.push_back(Clipper2Z.MakePathD(poly1ArrayInt));
-				poly2Paths.push_back(Clipper2Z.MakePathD(poly2ArrayInt));
+				const poly1Paths = new Clipper2Z.Paths64();
+				const poly2Paths = new Clipper2Z.Paths64();
+				poly1Paths.push_back(Clipper2Z.MakePath64(poly1ArrayInt));
+				poly2Paths.push_back(Clipper2Z.MakePath64(poly2ArrayInt));
 
 				initPolyOperationClipper2(Clipper2Z, poly1Paths, poly2Paths);
 

@@ -17,7 +17,7 @@ function testPolyOperationClipper1(
 
 let out;
 function initPolyOperationClipper2(lib) {
-	out = new lib.PathsD();
+	out = new lib.Paths64();
 }
 
 function testPolyOperationClipper2(
@@ -27,7 +27,7 @@ function testPolyOperationClipper2(
 	subject,
 	clip
 ) {
-	const clipper2 = new lib.CreateClipperD(false);
+	const clipper2 = new lib.CreateClipper64(false);
 	clipper2.AddSubject(subject);
 	clipper2.AddClip(clip);
 	clipper2.ExecutePath(clipType, subjectFillType, out);
