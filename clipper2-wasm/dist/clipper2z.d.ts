@@ -1,3 +1,6 @@
+/// <reference types="emscripten" />
+export interface Clipper2ZFactoryFunction extends EmscriptenModuleFactory<MainModule & EmscriptenModule> { }
+
 export interface ClipperBase {
   Clear(): void;
   Clear(): void;
@@ -10,32 +13,32 @@ export interface ClipperBase {
 export interface FillRuleValue<T extends number> {
   value: T;
 }
-export type FillRule = FillRuleValue<0>|FillRuleValue<1>|FillRuleValue<2>|FillRuleValue<3>;
+export type FillRule = FillRuleValue<0> | FillRuleValue<1> | FillRuleValue<2> | FillRuleValue<3>;
 
 export interface ClipTypeValue<T extends number> {
   value: T;
 }
-export type ClipType = ClipTypeValue<1>|ClipTypeValue<2>|ClipTypeValue<3>|ClipTypeValue<4>;
+export type ClipType = ClipTypeValue<1> | ClipTypeValue<2> | ClipTypeValue<3> | ClipTypeValue<4>;
 
 export interface PathTypeValue<T extends number> {
   value: T;
 }
-export type PathType = PathTypeValue<0>|PathTypeValue<1>;
+export type PathType = PathTypeValue<0> | PathTypeValue<1>;
 
 export interface JoinTypeValue<T extends number> {
   value: T;
 }
-export type JoinType = JoinTypeValue<0>|JoinTypeValue<2>|JoinTypeValue<3>;
+export type JoinType = JoinTypeValue<0> | JoinTypeValue<2> | JoinTypeValue<3>;
 
 export interface EndTypeValue<T extends number> {
   value: T;
 }
-export type EndType = EndTypeValue<0>|EndTypeValue<1>|EndTypeValue<2>|EndTypeValue<3>|EndTypeValue<4>;
+export type EndType = EndTypeValue<0> | EndTypeValue<1> | EndTypeValue<2> | EndTypeValue<3> | EndTypeValue<4>;
 
 export interface PointInPolygonResultValue<T extends number> {
   value: T;
 }
-export type PointInPolygonResult = PointInPolygonResultValue<0>|PointInPolygonResultValue<1>|PointInPolygonResultValue<2>;
+export type PointInPolygonResult = PointInPolygonResultValue<0> | PointInPolygonResultValue<1> | PointInPolygonResultValue<2>;
 
 export interface Point64 {
   x: bigint;
@@ -167,17 +170,17 @@ export interface ClipperD extends ClipperBase {
 
 export interface MainModule {
   ClipperBase: {};
-  FillRule: {EvenOdd: FillRuleValue<0>, NonZero: FillRuleValue<1>, Positive: FillRuleValue<2>, Negative: FillRuleValue<3>};
-  ClipType: {Intersection: ClipTypeValue<1>, Union: ClipTypeValue<2>, Difference: ClipTypeValue<3>, Xor: ClipTypeValue<4>};
-  PathType: {Subject: PathTypeValue<0>, Clip: PathTypeValue<1>};
-  JoinType: {Square: JoinTypeValue<0>, Round: JoinTypeValue<2>, Miter: JoinTypeValue<3>};
-  EndType: {Polygon: EndTypeValue<0>, Joined: EndTypeValue<1>, Butt: EndTypeValue<2>, Square: EndTypeValue<3>, Round: EndTypeValue<4>};
-  PointInPolygonResult: {IsOn: PointInPolygonResultValue<0>, IsInside: PointInPolygonResultValue<1>, IsOutside: PointInPolygonResultValue<2>};
-  Point64: {new(_0: bigint, _1: bigint, _2: bigint): Point64};
-  Path64: {new(): Path64};
-  Paths64: {new(): Paths64};
+  FillRule: { EvenOdd: FillRuleValue<0>, NonZero: FillRuleValue<1>, Positive: FillRuleValue<2>, Negative: FillRuleValue<3> };
+  ClipType: { Intersection: ClipTypeValue<1>, Union: ClipTypeValue<2>, Difference: ClipTypeValue<3>, Xor: ClipTypeValue<4> };
+  PathType: { Subject: PathTypeValue<0>, Clip: PathTypeValue<1> };
+  JoinType: { Square: JoinTypeValue<0>, Round: JoinTypeValue<2>, Miter: JoinTypeValue<3> };
+  EndType: { Polygon: EndTypeValue<0>, Joined: EndTypeValue<1>, Butt: EndTypeValue<2>, Square: EndTypeValue<3>, Round: EndTypeValue<4> };
+  PointInPolygonResult: { IsOn: PointInPolygonResultValue<0>, IsInside: PointInPolygonResultValue<1>, IsOutside: PointInPolygonResultValue<2> };
+  Point64: { new(_0: bigint, _1: bigint, _2: bigint): Point64 };
+  Path64: { new(): Path64 };
+  Paths64: { new(): Paths64 };
   PointInPolygon64(_0: Point64, _1: Path64): PointInPolygonResult;
-  Rect64: {new(): Rect64; new(_0: bigint, _1: bigint, _2: bigint, _3: bigint): Rect64};
+  Rect64: { new(): Rect64; new(_0: bigint, _1: bigint, _2: bigint, _3: bigint): Rect64 };
   RectClipPaths64(_0: Rect64, _1: Paths64): Paths64;
   RectClipPath64(_0: Rect64, _1: Path64): Paths64;
   RectClipLinesPaths64(_0: Rect64, _1: Paths64): Paths64;
@@ -188,15 +191,15 @@ export interface MainModule {
   UnionSelf64(_0: Paths64, _1: FillRule): Paths64;
   Difference64(_0: Paths64, _1: Paths64, _2: FillRule): Paths64;
   Xor64(_0: Paths64, _1: Paths64, _2: FillRule): Paths64;
-  PolyPath64: {new(): PolyPath64};
-  Clipper64: {new(): Clipper64};
-  PointD: {new(_0: number, _1: number, _2: number): PointD};
-  PathD: {new(): PathD};
-  PathsD: {new(): PathsD};
+  PolyPath64: { new(): PolyPath64 };
+  Clipper64: { new(): Clipper64 };
+  PointD: { new(_0: number, _1: number, _2: number): PointD };
+  PathD: { new(): PathD };
+  PathsD: { new(): PathsD };
   PointInPolygonD(_0: PointD, _1: PathD): PointInPolygonResult;
-  RectD: {new(): RectD; new(_0: number, _1: number, _2: number, _3: number): RectD};
-  PolyPathD: {new(): PolyPathD};
-  ClipperD: {new(): ClipperD};
+  RectD: { new(): RectD; new(_0: number, _1: number, _2: number, _3: number): RectD };
+  PolyPathD: { new(): PolyPathD };
+  ClipperD: { new(): ClipperD };
   ReversePath64(_0: Path64): void;
   BooleanOpOut64(_0: ClipType, _1: FillRule, _2: Paths64, _3: Paths64, _4: PolyPath64): void;
   ReversePathD(_0: PathD): void;
@@ -239,4 +242,12 @@ export interface MainModule {
   InflatePathsD(_0: PathsD, _1: number, _2: JoinType, _3: EndType, _4: number, _5: number, _6: number): PathsD;
   SimplifyPathD(_0: PathD, _1: number, _2: boolean): PathD;
   SimplifyPathsD(_0: PathsD, _1: number, _2: boolean): PathsD;
+  MakePath64(intArray: Array<number | bigint>): Path64;
+  MakePathZ64(intArray: Array<number | bigint>): Path64;
+  MakePathD(intArray: number[]): PathD;
+  MakePathZD(intArray: number[]): PathD;
+  PathDToPath64(pathD: PathD): Path64;
+  Path64ToPathD(path64: Path64): PathD;
+  Paths64ToPathsD(paths64: Paths64): PathsD;
+  PathsDToPaths64(pathsD: PathsD): Paths64;
 }

@@ -28,18 +28,18 @@ https://github.com/ErikSom/Clipper2-WASM/tree/main/CPP/clipper2-wasm/examples/um
 
 ## Typescript example:
 ```javascript
-import { MainModule } from 'clipper2-wasm';
+import { Clipper2ZFactoryFunction, MainModule } from 'clipper2-wasm/dist/clipper2z';
 import * as _Clipper2ZFactory from 'clipper2-wasm/dist/umd/clipper2z';
 
-const Clipper2ZFactory = _Clipper2ZFactory as any;
+const Clipper2ZFactory: Clipper2ZFactoryFunction = _Clipper2ZFactory;
 
 Clipper2ZFactory({
 	locateFile: () => {
-		return './clipper2z.wasm'
+		return 'path/to/your/clipper2z.wasm'
 	},
 }).then((Clipper2Z: MainModule) => {
 	console.log('Clipper2Z', Clipper2Z);
-});
+})
 ```
 
 ## Benchmark vs Clipper1 WASM: (Apple M2 Pro)

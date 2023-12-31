@@ -1,3 +1,6 @@
+/// <reference types="emscripten" />
+export interface Clipper2ZUtilsFactoryFunction extends EmscriptenModuleFactory<MainModule & EmscriptenModule> { }
+
 export interface FillRuleValue<T extends number> {
   value: T;
 }
@@ -33,6 +36,22 @@ export interface PathD {
   delete(): void;
 }
 
+export interface Path64 {
+  clear(): void;
+  push_back(_0: Point64): void;
+  size(): number;
+  get(_0: number): Point64;
+  delete(): void;
+}
+
+export interface Paths64 {
+  clear(): void;
+  push_back(_0: Path64): void;
+  size(): number;
+  get(_0: number): Path64;
+  delete(): void;
+}
+
 export interface PathsD {
   clear(): void;
   push_back(_0: PathD): void;
@@ -58,4 +77,8 @@ export interface MainModule {
   PathsD: {new(): PathsD};
   Point64: {new(_0: bigint, _1: bigint, _2: bigint): Point64};
   SvgAddSolution(_0: SvgWriter, _1: PathsD, _2: FillRule, _3: boolean): void;
+  PathDToPath64(pathD: PathD): Path64;
+  Path64ToPathD(path64: Path64): PathD;
+  Paths64ToPathsD(paths64: Paths64): PathsD;
+  PathsDToPaths64(pathsD: PathsD): Paths64;
 }
