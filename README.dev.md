@@ -50,4 +50,4 @@ sh clipper2-wasm/compile-wasm.sh prod
 After completing these steps, you will find the WASM builds in the `clipper2-wasm/dist` directory.
 
 ### Generating typescript files
-Append `--embind-emit-tsd ../clipper2z.d.ts` to the ES6 export, manually at the Factory export and the glue-stub functions.
+Append `--embind-emit-tsd ../clipper2z.d.ts` to the ES6 export, manually add the Factory export and the glue-stub functions.
