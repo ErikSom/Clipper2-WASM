@@ -40,7 +40,7 @@ function MakePathZ64(intArray) {
 
 	return path;
 }
-Module["MakePathZD"] = MakePathZD;
+Module["MakePathZ64"] = MakePathZ64;
 
 function MakePathD(intArray) {
 	if(intArray.length % 2 != 0) {
