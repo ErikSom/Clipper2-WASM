@@ -280,7 +280,7 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
 
         // ClipperD
         class_<ClipperD, base<ClipperBase>>("ClipperD")
-        .constructor<>()
+        .constructor<int>()
         .function("AddSubject", &ClipperD::AddSubject, allow_raw_pointers())
         .function("AddOpenSubject", &ClipperD::AddOpenSubject, allow_raw_pointers())
         .function("AddClip", &ClipperD::AddClip, allow_raw_pointers())
