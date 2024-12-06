@@ -12,7 +12,7 @@ mkdir -p clipper2-wasm/dist/umd
 COMMON_FLAGS="-Iclipper2/CPP/Clipper2Lib/include -DUSINGZ --bind -s MODULARIZE=1 -s WASM_BIGINT -s ALLOW_MEMORY_GROWTH=1 -s EXIT_RUNTIME=0"
 
 # Development build flags
-DEV_FLAGS="-g3 -s ASSERTIONS=2 --source-map-base http://localhost:11009/ -s DISABLE_EXCEPTION_CATCHING=0 -s DEMANGLE_SUPPORT=1 -s SAFE_HEAP=1 -O0"
+DEV_FLAGS="-g3 -s ASSERTIONS=2 --source-map-base http://localhost:11009/ -s DISABLE_EXCEPTION_CATCHING=0 -s SAFE_HEAP=1 -O0"
 
 # Production build flags
 PROD_FLAGS="-O3 -s DISABLE_EXCEPTION_CATCHING=1"
