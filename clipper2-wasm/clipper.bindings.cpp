@@ -119,8 +119,8 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .function("Intersects", &Rect64::Intersects)
         .function("Equals", &Rect64::operator==);
 
-        function("Ellipse64", select_overload<Path64(const Point64&, double, double, int)>(&Ellipse), allow_raw_pointers());
-        function("EllipseFromRect64", select_overload<Path64(const Rect64&, int)>(&Ellipse), allow_raw_pointers());
+        function("Ellipse64", select_overload<Path64(const Point64&, double, double, size_t)>(&Ellipse), allow_raw_pointers());
+        function("EllipseFromRect64", select_overload<Path64(const Rect64&, size_t)>(&Ellipse), allow_raw_pointers());
 
         // Translate64
         function("TranslatePath64", select_overload<Path64(const Path64&, int64_t, int64_t)>(&TranslatePath), allow_raw_pointers());
@@ -234,8 +234,8 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .function("Intersects", &RectD::Intersects)
         .function("Equals", &RectD::operator==);
 
-        function("EllipseD", select_overload<PathD(const PointD&, double, double, int)>(&Ellipse), allow_raw_pointers());
-        function("EllipseFromRectD", select_overload<PathD(const RectD&, int)>(&Ellipse), allow_raw_pointers());
+        function("EllipseD", select_overload<PathD(const PointD&, double, double, size_t)>(&Ellipse), allow_raw_pointers());
+        function("EllipseFromRectD", select_overload<PathD(const RectD&, size_t)>(&Ellipse), allow_raw_pointers());
 
         // TranslateD
         function("TranslatePathD", select_overload<PathD(const PathD&, double, double)>(&TranslatePath), allow_raw_pointers());
