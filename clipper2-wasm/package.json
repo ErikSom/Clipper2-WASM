@@ -1,6 +1,6 @@
 {
 	"name": "clipper2-wasm",
-	"version": "0.0.9",
+	"version": "0.2.0",
 	"description": "WebAssembly port of the Clipper2 library for polygon clipping and offsetting",
 	"module": "dist/es/clipper2z.js",
 	"main": "dist/umd/clipper2z.js",
@@ -24,5 +24,6 @@
 	],
 	"dependencies": {
 		"@types/emscripten": "^1.39.10"
-	}
+	},
+	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
