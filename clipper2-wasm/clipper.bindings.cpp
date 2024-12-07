@@ -291,4 +291,29 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .function("ExecutePoly", select_overload<bool(ClipType, FillRule, PolyTreeD&, PathsD&)>(&ClipperD::Execute), allow_raw_pointers());
 
         function("CreateClipperD", &CreateClipperD, allow_raw_pointers());
+
+        register_vector<double>("VectorDouble");
+        register_vector<int64_t>("VectorInt64");
+
+        function("MakePath64Fast",
+        emscripten::select_overload<Clipper2Lib::Path64(const emscripten::val&)>(
+                [](const emscripten::val& array) -> Clipper2Lib::Path64 {
+                const auto length = array["length"].as<unsigned>();
+                const int64_t* data = reinterpret_cast<const int64_t*>(array["buffer"].as<uintptr_t>() + array["byteOffset"].as<unsigned>());
+                return MakePath<int64_t>(std::vector<int64_t>(data, data + length));
+                }
+        ),
+        allow_raw_pointers());
+
+
+       function("MakePathDFast",
+        emscripten::select_overload<Clipper2Lib::PathD(const emscripten::val&)>(
+                [](const emscripten::val& array) -> Clipper2Lib::PathD {
+                const auto length = array["length"].as<unsigned>();
+                const double* data = reinterpret_cast<const double*>(array["buffer"].as<uintptr_t>() + array["byteOffset"].as<unsigned>());
+                return MakePathD<double>(std::vector<double>(data, data + length));
+                }
+        ),
+        allow_raw_pointers()
+        );
 }
