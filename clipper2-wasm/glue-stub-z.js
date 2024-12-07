@@ -20,6 +20,21 @@ function MakePath64(intArray) {
 }
 Module["MakePath64"] = MakePath64;
 
+function MakePath64Fast(intArray) {
+    if(intArray.length % 2 !== 0) {
+        throw "MakePath64: intArray.length must be even";
+    }
+
+    const typedArray = new BigInt64Array(intArray.length);
+
+    for (let i = 0; i < intArray.length; i++) {
+        typedArray[i] = BigInt(intArray[i]);
+    }
+
+    return Module.MakePath64(typedArray);
+}
+Module["MakePath64Fast"] = MakePath64Fast;
+
 function MakePathZ64(intArray) {
 	if(intArray.length % 3 != 0) {
 		throw "MakePathZ64: intArray.length must be multiple of 3";
@@ -42,6 +57,20 @@ function MakePathZ64(intArray) {
 }
 Module["MakePathZ64"] = MakePathZ64;
 
+function MakePathZ64Fast(intArray) {
+	if(intArray.length % 3 != 0) {
+		throw "MakePathZ64Fast: intArray.length must be multiple of 3";
+	}
+	const typedArray = new BigInt64Array(intArray.length);
+
+    for (let i = 0; i < intArray.length; i++) {
+        typedArray[i] = BigInt(intArray[i]);
+    }
+
+    return Module.MakePath64(typedArray);
+}
+Module["MakePathZ64Fast"] = MakePathZ64Fast;
+
 function MakePathD(intArray) {
 	if(intArray.length % 2 != 0) {
 		throw "MakePathD: intArray.length must be even";
@@ -58,6 +87,25 @@ function MakePathD(intArray) {
 }
 Module["MakePathD"] = MakePathD;
 
+function MakePathDFast(floatArray) {
+    if(floatArray.length % 2 !== 0) {
+        throw "MakePathD: floatArray.length must be even";
+    }
+
+    const typedArray = new Float64Array(floatArray.length);
+
+    if (floatArray instanceof Float64Array) {
+        typedArray.set(floatArray);
+    } else {
+        for (let i = 0; i < floatArray.length; i++) {
+            typedArray[i] = Number(floatArray[i]);
+        }
+    }
+
+    return Module.MakePathDFast(typedArray);
+}
+Module["MakePathDFast"] = MakePathDFast;
+
 function MakePathZD(intArray) {
 	if(intArray.length % 3 != 0) {
 		throw "MakePathZD: intArray.length must be multiple of 3";
@@ -73,6 +121,25 @@ function MakePathZD(intArray) {
 	return path;
 }
 Module["MakePathZD"] = MakePathZD;
+
+function MakePathZDFast(floatArray) {
+    if(floatArray.length % 2 !== 0) {
+        throw "MakePathD: floatArray.length must be even";
+    }
+
+    const typedArray = new Float64Array(floatArray.length);
+
+    if (floatArray instanceof Float64Array) {
+        typedArray.set(floatArray);
+    } else {
+        for (let i = 0; i < floatArray.length; i++) {
+            typedArray[i] = Number(floatArray[i]);
+        }
+    }
+
+    return Module.MakePathZDFast(typedArray);
+}
+Module["MakePathZDFast"] = MakePathZDFast;
 
 function PathDToPath64(pathD) {
 	let path = new Module["Path64"]();

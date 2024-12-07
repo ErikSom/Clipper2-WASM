@@ -20,11 +20,14 @@
 			solution = Intersect(subject, clip, FillRule::NonZero);
 			*/
 
-			const { MakePath64, Paths64, FillRule, Intersect64 } = Clipper2Z;
+			const { MakePath64Fast, Paths64, FillRule, Intersect64 } = Clipper2Z;
 			const subject = new Paths64();
 			const clip = new Paths64();
-			subject.push_back(MakePath64([100, 50, 10, 79, 65, 2, 65, 98, 10, 21]));
-			clip.push_back(MakePath64([98, 63, 4, 68, 77, 8, 52, 100, 19, 12]));
+			subject.push_back(MakePath64Fast([100, 50, 10, 79, 65, 2, 65, 98, 10, 21]));
+			clip.push_back(MakePath64Fast([98, 63, 4, 68, 77, 8, 52, 100, 19, 12]));
+
+			console.log(Clipper2Z);
+
 			const solution = Intersect64(subject, clip, FillRule.NonZero);
 
 			// comment out the draw subject and clip to see the solution only
@@ -33,6 +36,7 @@
 
 			drawPaths(solution, 'blue');
 		});
+		
 	</script>
 </body>
 </html>

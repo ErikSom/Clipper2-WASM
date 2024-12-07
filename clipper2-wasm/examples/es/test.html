@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Clipper2Z - ES6 - Example Basic</title>
+	<script src="../drawPath.js"></script>
+</head>
+<body>
+	<script type="module">
+		import Clipper2ZFactory from '../../dist/es/clipper2z.js';
+
+		Clipper2ZFactory().then((Clipper2Z) => {
+			const { MakePath64, MakePath64Fast, Paths64, FillRule, Union64 } = Clipper2Z
+
+			const start = performance.now();
+			for (let i = 0; i < 10000; i++)
+			{
+
+				let a = [-5070000, -23550000, 7710000, -23550000, 7710000, 22590000, -5070000, 22590000];
+				let b = [0, 0, 7140200, 0, 7140200, 860200, 0, 860200];
+
+				const subject = new Paths64();
+				const clip = new Paths64();
+
+				const combinedNfp1 = Union64(subject, clip, FillRule.NonZero);
+				subject.push_back(MakePath64(a));
+
+				const subject1 = new Paths64();
+				subject1.push_back(MakePath64(b));
+				let finalNfp1 = Clipper2Z.Difference64(subject1, combinedNfp1, FillRule.NonZero);
+
+				let fnfp = [];
+				for (let i = 0; i < finalNfp1.size(); i++)
+				{
+					let path = finalNfp1.get(i);
+					path.size();
+					let arr = [];
+					for (let j = 0; j < path.size(); j++)
+					{
+						let p = path.get(j);
+						arr.push({ x: p.x, y: p.y });
+					}
+
+					fnfp.push(arr);
+				}
+
+				// console.log(fnfp);
+			}
+
+			const end = performance.now();
+			console.log('Time:', end - start);
+
+
+			const start2 = performance.now();
+
+			for (let i = 0; i < 10000; i++)
+			{
+
+				let a = [-5070000, -23550000, 7710000, -23550000, 7710000, 22590000, -5070000, 22590000];
+				let b = [0, 0, 7140200, 0, 7140200, 860200, 0, 860200];
+
+				const subject = new Paths64();
+				const clip = new Paths64();
+
+				const combinedNfp1 = Union64(subject, clip, FillRule.NonZero);
+				subject.push_back(MakePath64Fast(a));
+
+				const subject1 = new Paths64();
+				subject1.push_back(MakePath64Fast(b));
+				let finalNfp1 = Clipper2Z.Difference64(subject1, combinedNfp1, FillRule.NonZero);
+
+				let fnfp = [];
+				for (let i = 0; i < finalNfp1.size(); i++)
+				{
+					let path = finalNfp1.get(i);
+					path.size();
+					let arr = [];
+					for (let j = 0; j < path.size(); j++)
+					{
+						let p = path.get(j);
+						arr.push({ x: p.x, y: p.y });
+					}
+
+					fnfp.push(arr);
+				}
+
+				// console.log(fnfp);
+			}
+
+			const end2 = performance.now();
+			console.log('Time2:', end2 - start2);
+
+		});
+
+	</script>
+</body>
+</html>
