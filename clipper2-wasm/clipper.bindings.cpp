@@ -153,8 +153,12 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         function("SimplifyPaths64", select_overload<Paths64(const Paths64&, double, bool)>(&SimplifyPaths), allow_raw_pointers());
         function("TrimCollinear64", select_overload<Path64(const Path64&, bool)>(&TrimCollinear), allow_raw_pointers());
 
+        // PolyPath
+        class_<PolyPath>("PolyPath")
+        .function("isHole", &PolyPath::IsHole);
+
         // PolyPath64
-        class_<PolyPath64>("PolyPath64")
+        class_<PolyPath64, base<PolyPath>>("PolyPath64")
         .constructor<>()
         .function("addChild", &PolyPath64::AddChild, allow_raw_pointers())
         .function("clear", &PolyPath64::Clear)
@@ -269,7 +273,7 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         function("TrimCollinearD", select_overload<PathD(const PathD&, int, bool)>(&TrimCollinear), allow_raw_pointers());
 
         // PolyPathD
-        class_<PolyPathD>("PolyPathD")
+        class_<PolyPathD, base<PolyPath>>("PolyPathD")
         .constructor<>()
         .function("addChild", select_overload<PolyPathD*(const PathD&)>(&PolyPathD::AddChild), allow_raw_pointers())
         .function("clear", &PolyPathD::Clear)
