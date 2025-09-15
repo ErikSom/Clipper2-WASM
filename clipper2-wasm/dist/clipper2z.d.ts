@@ -83,7 +83,11 @@ export interface Rect64 {
   delete(): void;
 }
 
-export interface PolyPath64 {
+export interface PolyPath {
+  isHole(): boolean;
+}
+
+export interface PolyPath64 extends PolyPath {
   addChild(_0: Path64): PolyPath64;
   polygon(): Path64;
   clear(): void;
@@ -147,7 +151,7 @@ export interface RectD {
   delete(): void;
 }
 
-export interface PolyPathD {
+export interface PolyPathD extends PolyPath {
   addChild(_0: PathD): PolyPathD;
   polygon(): PathD;
   clear(): void;
