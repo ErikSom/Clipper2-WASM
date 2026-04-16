@@ -40,6 +40,21 @@ export interface PointInPolygonResultValue<T extends number> {
 }
 export type PointInPolygonResult = PointInPolygonResultValue<0> | PointInPolygonResultValue<1> | PointInPolygonResultValue<2>;
 
+export interface TriangulateResultValue<T extends number> {
+  value: T;
+}
+export type TriangulateResult = TriangulateResultValue<0> | TriangulateResultValue<1> | TriangulateResultValue<2> | TriangulateResultValue<3>;
+
+export interface TriangulateResult64 {
+  result: TriangulateResult;
+  solution: Paths64;
+}
+
+export interface TriangulateResultD {
+  result: TriangulateResult;
+  solution: PathsD;
+}
+
 export interface Point64 {
   x: bigint;
   y: bigint;
@@ -180,6 +195,7 @@ export interface MainModule {
   JoinType: { Square: JoinTypeValue<0>, Round: JoinTypeValue<2>, Miter: JoinTypeValue<3> };
   EndType: { Polygon: EndTypeValue<0>, Joined: EndTypeValue<1>, Butt: EndTypeValue<2>, Square: EndTypeValue<3>, Round: EndTypeValue<4> };
   PointInPolygonResult: { IsOn: PointInPolygonResultValue<0>, IsInside: PointInPolygonResultValue<1>, IsOutside: PointInPolygonResultValue<2> };
+  TriangulateResult: { Success: TriangulateResultValue<0>, Fail: TriangulateResultValue<1>, NoPolygons: TriangulateResultValue<2>, PathsIntersect: TriangulateResultValue<3> };
   Point64: { new(_0: bigint, _1: bigint, _2: bigint): Point64 };
   Path64: { new(): Path64 };
   Paths64: { new(): Paths64 };
@@ -238,6 +254,8 @@ export interface MainModule {
   InflatePaths64(_0: Paths64, _1: number, _2: JoinType, _3: EndType, _4: number, _5: number): Paths64;
   SimplifyPath64(_0: Path64, _1: number, _2: boolean): Path64;
   SimplifyPaths64(_0: Paths64, _1: number, _2: boolean): Paths64;
+  Triangulate64(_0: Paths64, _1: boolean): TriangulateResult64;
+  TriangulateD(_0: PathsD, _1: number, _2: boolean): TriangulateResultD;
   AreaPathD(_0: PathD): number;
   AreaPathsD(_0: PathsD): number;
   EllipseD(_0: PointD, _1: number, _2: number, _3: number): PathD;

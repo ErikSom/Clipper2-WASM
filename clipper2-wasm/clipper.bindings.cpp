@@ -1,5 +1,6 @@
 #include "clipper2/clipper.core.h"
 #include "clipper2/clipper.h"
+#include "clipper2/clipper.triangulation.h"
 #include <emscripten/bind.h>
 
 using namespace emscripten;
@@ -10,6 +11,28 @@ void ReversePath(Path<T>& path) {
     std::reverse(path.begin(), path.end());
 }
 
+
+struct TriangulateResult64 {
+    TriangulateResult result;
+    Paths64 solution;
+};
+
+struct TriangulateResultD {
+    TriangulateResult result;
+    PathsD solution;
+};
+
+TriangulateResult64 Triangulate64(const Paths64& pp, bool useDelaunay) {
+    TriangulateResult64 res;
+    res.result = Triangulate(pp, res.solution, useDelaunay);
+    return res;
+}
+
+TriangulateResultD TriangulateD(const PathsD& pp, int decPlaces, bool useDelaunay) {
+    TriangulateResultD res;
+    res.result = Triangulate(pp, decPlaces, res.solution, useDelaunay);
+    return res;
+}
 
 Clipper64* CreateClipper64(bool preserveCollinear) {
     Clipper64* clipper = new Clipper64();
@@ -61,6 +84,20 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .value("IsOn", PointInPolygonResult::IsOn)
         .value("IsInside", PointInPolygonResult::IsInside)
         .value("IsOutside", PointInPolygonResult::IsOutside);
+
+        enum_<TriangulateResult>("TriangulateResult")
+        .value("Success", TriangulateResult::success)
+        .value("Fail", TriangulateResult::fail)
+        .value("NoPolygons", TriangulateResult::no_polygons)
+        .value("PathsIntersect", TriangulateResult::paths_intersect);
+
+        value_object<TriangulateResult64>("TriangulateResult64")
+        .field("result", &TriangulateResult64::result)
+        .field("solution", &TriangulateResult64::solution);
+
+        value_object<TriangulateResultD>("TriangulateResultD")
+        .field("result", &TriangulateResultD::result)
+        .field("solution", &TriangulateResultD::solution);
 
         // #############################
         // ###### 64 bit bindings ######
@@ -152,6 +189,9 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         function("SimplifyPath64", select_overload<Path64(const Path64&, double, bool)>(&SimplifyPath), allow_raw_pointers());
         function("SimplifyPaths64", select_overload<Paths64(const Paths64&, double, bool)>(&SimplifyPaths), allow_raw_pointers());
         function("TrimCollinear64", select_overload<Path64(const Path64&, bool)>(&TrimCollinear), allow_raw_pointers());
+
+        // Triangulate
+        function("Triangulate64", &Triangulate64, allow_raw_pointers());
 
         // PolyPath
         class_<PolyPath>("PolyPath")
@@ -271,6 +311,9 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         function("SimplifyPathD", select_overload<PathD(const PathD&, double, bool)>(&SimplifyPath), allow_raw_pointers());
         function("SimplifyPathsD", select_overload<PathsD(const PathsD&, double, bool)>(&SimplifyPaths), allow_raw_pointers());
         function("TrimCollinearD", select_overload<PathD(const PathD&, int, bool)>(&TrimCollinear), allow_raw_pointers());
+
+        // Triangulate
+        function("TriangulateD", &TriangulateD, allow_raw_pointers());
 
         // PolyPathD
         class_<PolyPathD, base<PolyPath>>("PolyPathD")
