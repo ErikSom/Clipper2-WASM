@@ -7,9 +7,7 @@ export interface FillRuleValue<T extends number> {
 export type FillRule = FillRuleValue<0>|FillRuleValue<1>|FillRuleValue<2>|FillRuleValue<3>;
 
 export interface SvgReader {
-  GetPaths(): PathsD;
-  Clear(): void;
-  LoadFromFile(_0: ArrayBuffer|Uint8Array|Uint8ClampedArray|Int8Array|string): boolean;
+  paths: PathsD;
   delete(): void;
 }
 
@@ -70,7 +68,7 @@ export interface Point64 {
 
 export interface MainModule {
   FillRule: {EvenOdd: FillRuleValue<0>, NonZero: FillRuleValue<1>, Positive: FillRuleValue<2>, Negative: FillRuleValue<3>};
-  SvgReader: {new(): SvgReader};
+  SvgReader: {new(_0: string): SvgReader};
   SvgWriter: {new(): SvgWriter};
   PointD: {new(_0: number, _1: number, _2: number): PointD};
   PathD: {new(): PathD};
