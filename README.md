@@ -13,6 +13,7 @@ For Clipper2 documentation please see the [Extensive HTML documentation](http://
 - [Offset](https://eriksom.github.io/Clipper2-WASM/clipper2-wasm/examples/es/offset.html)
 - [Minkowski](https://eriksom.github.io/Clipper2-WASM/clipper2-wasm/examples/es/minkowski.html)
 - [Rect Clip Lines](https://eriksom.github.io/Clipper2-WASM/clipper2-wasm/examples/es/rectclip-lines.html)
+- [Triangulation](https://eriksom.github.io/Clipper2-WASM/clipper2-wasm/examples/es/triangulation.html)
 
 ## Download lib
 ES6: https://github.com/ErikSom/Clipper2-WASM/tree/main/CPP/clipper2-wasm/dist/es/

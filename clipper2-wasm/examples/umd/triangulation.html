@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Clipper2Z - UMD - Example Triangulation</title>
+	<script src="../drawPath.js"></script>
+	<script src="../../dist/umd/clipper2z.js"></script>
+	<script src="../../dist/umd/clipper2z-utils.js"></script>
+</head>
+<body>
+	<script>
+		const promises = [
+			Clipper2ZFactory(),
+			Clipper2ZUtilsFactory(),
+		];
+
+		/* C++:
+		SvgReader svg_reader("/coral3.svg");
+		PathsD pathsD = svg_reader.paths;
+		Paths64 paths64 = PathsDToPaths64(pathsD);
+		Paths64 solution;
+		TriangulateResult result = Triangulate(paths64, solution, true);
+		*/
+
+		Promise.all(promises).then(([Clipper2Z, Clipper2ZUtils]) => {
+			fetch('../coral3.svg')
+			.then(r => r.arrayBuffer())
+			.then(data => {
+				const { SvgReader } = Clipper2ZUtils;
+				const { Triangulate64, TriangulateResult, Paths64, PathsDToPaths64 } = Clipper2Z;
+
+				Clipper2ZUtils.FS.writeFile('/coral3.svg', new Uint8Array(data));
+				const reader = new SvgReader('/coral3.svg');
+				const pathsD = reader.paths;
+				const paths64 = PathsDToPaths64(pathsD);
+
+				const { result, solution } = Triangulate64(paths64, true);
+
+				initCanvas(600, 600);
+				const canvas = document.querySelector('canvas');
+				const ctx = canvas.getContext('2d');
+
+				const triCount = solution.size();
+
+				let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+				for (let i = 0; i < triCount; i++) {
+					const tri = solution.get(i);
+					for (let j = 0; j < tri.size(); j++) {
+						const p = tri.get(j);
+						const x = Number(p.x), y = Number(p.y);
+						if (x < minX) minX = x; if (x > maxX) maxX = x;
+						if (y < minY) minY = y; if (y > maxY) maxY = y;
+					}
+				}
+
+				const PAD = 20;
+				const scale = Math.min((600 - PAD * 2) / (maxX - minX), (600 - PAD * 2) / (maxY - minY));
+				const ox = PAD - minX * scale + ((600 - PAD * 2) - (maxX - minX) * scale) / 2;
+				const oy = PAD - minY * scale + ((600 - PAD * 2) - (maxY - minY) * scale) / 2;
+
+				for (let i = 0; i < triCount; i++) {
+					const tri = solution.get(i);
+					if (tri.size() < 3) continue;
+					const p0 = tri.get(0), p1 = tri.get(1), p2 = tri.get(2);
+					ctx.fillStyle = `hsl(${(i / triCount) * 300}, 80%, 55%)`;
+					ctx.beginPath();
+					ctx.moveTo(Number(p0.x) * scale + ox, Number(p0.y) * scale + oy);
+					ctx.lineTo(Number(p1.x) * scale + ox, Number(p1.y) * scale + oy);
+					ctx.lineTo(Number(p2.x) * scale + ox, Number(p2.y) * scale + oy);
+					ctx.closePath();
+					ctx.fill();
+					ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+					ctx.lineWidth = 0.4;
+					ctx.stroke();
+				}
+			});
+		});
+	</script>
+</body>
+</html>
