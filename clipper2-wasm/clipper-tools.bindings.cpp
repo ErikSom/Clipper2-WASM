@@ -14,10 +14,8 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .value("Negative", FillRule::Negative);
 
 	class_<SvgReader>("SvgReader")
-    .constructor<>()
-		.function("LoadFromFile", &SvgReader::LoadFromFile)
-		.function("Clear", &SvgReader::Clear)
-		.function("GetPaths", &SvgReader::GetPaths);
+    .constructor<std::string>()
+		.property("paths", &SvgReader::paths);
 
 	class_<SvgWriter>("SvgWriter")
         .constructor<>()
