@@ -54,10 +54,8 @@
 				const fs = Clipper2ZUtils.FS;
 				fs.writeFile('/rabbit.svg', uint8Data);
 
-				const reader = new SvgReader();
-				reader.LoadFromFile('/rabbit.svg');
-
-				const pathsD = reader.GetPaths();
+				const reader = new SvgReader('/rabbit.svg');
+				const pathsD = reader.paths;
 
 				drawPaths(pathsD, 'blue');
 
