@@ -3,7 +3,7 @@ function MakePath64(intArray) {
 		throw "MakePath64: intArray.length must be even";
 	}
 	const n = intArray.length / 2;
-	const flat = new BigInt64Array(n * 3); // z defaults to 0n
+	const flat = new BigInt64Array(n * 3);
 	for (let i = 0, j = 0; i < intArray.length; i += 2, j += 3) {
 		const a = intArray[i], b = intArray[i + 1];
 		flat[j]     = typeof a === 'bigint' ? a : BigInt(a);
@@ -37,7 +37,7 @@ function MakePathD(intArray) {
 		throw "MakePathD: intArray.length must be even";
 	}
 	const n = intArray.length / 2;
-	const flat = new Float64Array(n * 3); // z defaults to 0
+	const flat = new Float64Array(n * 3);
 	for (let i = 0, j = 0; i < intArray.length; i += 2, j += 3) {
 		flat[j]     = intArray[i];
 		flat[j + 1] = intArray[i + 1];
@@ -62,7 +62,7 @@ function MakePathZD(intArray) {
 Module["MakePathZD"] = MakePathZD;
 
 function PathDToPath64(pathD) {
-	const src = pathD.view(); // Float64Array, length 3N
+	const src = pathD.view();
 	const dst = new BigInt64Array(src.length);
 	for (let i = 0; i < src.length; i++) {
 		dst[i] = BigInt(Math.round(src[i]));
@@ -75,7 +75,7 @@ function PathDToPath64(pathD) {
 Module["PathDToPath64"] = PathDToPath64;
 
 function Path64ToPathD(path64) {
-	const src = path64.view(); // BigInt64Array, length 3N
+	const src = path64.view();
 	const dst = new Float64Array(src.length);
 	for (let i = 0; i < src.length; i++) {
 		dst[i] = Number(src[i]);

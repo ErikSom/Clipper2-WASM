@@ -26,8 +26,6 @@ function drawPath(path, color = 'black', closed = true) {
 	ctx.strokeStyle = color;
 	ctx.beginPath();
 
-	// Zero-copy view into the path's contiguous [x0,y0,z0, x1,y1,z1, ...] storage.
-	// Float64Array for PathD, BigInt64Array for Path64 — Number() handles both.
 	const v = path.view();
 	if (v.length === 0) return;
 

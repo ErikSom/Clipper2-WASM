@@ -7,7 +7,6 @@
 using namespace emscripten;
 using namespace Clipper2Lib;
 
-// view/assign assume USINGZ layout: PointD == {x, y, z}, no padding.
 #ifdef USINGZ
 static_assert(sizeof(PointD) == 3 * sizeof(double),
               "PathD_view/assign require USINGZ layout: PointD == {x, y, z}");

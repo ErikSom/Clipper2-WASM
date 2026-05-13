@@ -11,19 +11,12 @@ void ReversePath(Path<T>& path) {
     std::reverse(path.begin(), path.end());
 }
 
-// view/assign helpers below assume Point64/PointD are {x, y, z} triples with no
-// padding, which only holds when the library is built with -DUSINGZ. The class_<>
-// bindings for Point64/PointD are similarly USINGZ-guarded; these static_asserts
-// fail the build loudly if anyone drops the flag.
 #ifdef USINGZ
 static_assert(sizeof(Point64) == 3 * sizeof(int64_t),
               "Path64_view/assign require USINGZ layout: Point64 == {x, y, z}");
 static_assert(sizeof(PointD) == 3 * sizeof(double),
               "PathD_view/assign require USINGZ layout: PointD == {x, y, z}");
 
-// Zero-copy typed-array view over a Path's contiguous point storage.
-// Layout is [x0,y0,z0, x1,y1,z1, ...]. The view aliases WASM heap memory and
-// is invalidated by anything that reallocates the path or grows WASM memory.
 val Path64_view(const Path64& path) {
     return val(typed_memory_view(path.size() * 3,
                                  reinterpret_cast<const int64_t*>(path.data())));
@@ -34,9 +27,6 @@ val PathD_view(const PathD& path) {
                                  reinterpret_cast<const double*>(path.data())));
 }
 
-// Bulk write: replace path contents from a flat JS typed array of [x,y,z,...].
-// One trampoline per call; the actual copy is a single JS-side TypedArray.set
-// which compiles to a memcpy-like loop.
 void Path64_assign(Path64& path, val jsArray) {
     const unsigned len = jsArray["length"].as<unsigned>();
     if (len % 3 != 0) {
