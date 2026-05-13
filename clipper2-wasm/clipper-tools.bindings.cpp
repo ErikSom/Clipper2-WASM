@@ -2,9 +2,34 @@
 #include "clipper.svg.h"
 #include "clipper.svg.utils.h"
 #include <emscripten/bind.h>
+#include <emscripten/val.h>
 
 using namespace emscripten;
 using namespace Clipper2Lib;
+
+// view/assign assume USINGZ layout: PointD == {x, y, z}, no padding.
+#ifdef USINGZ
+static_assert(sizeof(PointD) == 3 * sizeof(double),
+              "PathD_view/assign require USINGZ layout: PointD == {x, y, z}");
+
+val PathD_view(const PathD& path) {
+    return val(typed_memory_view(path.size() * 3,
+                                 reinterpret_cast<const double*>(path.data())));
+}
+
+void PathD_assign(PathD& path, val jsArray) {
+    const unsigned len = jsArray["length"].as<unsigned>();
+    if (len % 3 != 0) {
+        throw std::runtime_error("PathD.assign: array length must be a multiple of 3");
+    }
+    const unsigned n = len / 3;
+    path.resize(n);
+    if (n > 0) {
+        val view(typed_memory_view(n * 3, reinterpret_cast<double*>(path.data())));
+        view.call<void>("set", jsArray);
+    }
+}
+#endif // USINGZ
 
 EMSCRIPTEN_BINDINGS(clipper_module) {
     enum_<FillRule>("FillRule")
@@ -47,7 +72,12 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
 		.function("size", &PathD::size)
 		.function("clear", &PathD::clear)
 		.function("push_back", select_overload<void(const PointD&)>(&PathD::push_back))
-		.function("get", select_overload<PointD&(size_t)>(&PathD::operator[]), allow_raw_pointers());
+		.function("get", select_overload<PointD&(size_t)>(&PathD::operator[]), allow_raw_pointers())
+#ifdef USINGZ
+		.function("view", &PathD_view)
+		.function("assign", &PathD_assign)
+#endif
+		;
 
 	class_<PathsD>("PathsD")
 		.constructor<>()

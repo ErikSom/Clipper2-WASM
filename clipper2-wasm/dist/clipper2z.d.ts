@@ -53,6 +53,13 @@ export interface Path64 {
   push_back(_0: Point64): void;
   size(): number;
   get(_0: number): Point64;
+  /** Zero-copy view of contiguous [x0,y0,z0, x1,y1,z1, ...] storage.
+   *  Invalidated by any path mutation or WASM memory growth — read immediately. */
+  view(): BigInt64Array;
+  /** Bulk replace contents from a flat [x,y,z,...] BigInt64Array (length must be multiple of 3).
+   *  Caller must pass a BigInt64Array; on type mismatch (e.g. Float64Array) the path is
+   *  resized first and JS-side .set() then throws, leaving the path zeroed. */
+  assign(_0: BigInt64Array): void;
   delete(): void;
 }
 
@@ -121,6 +128,13 @@ export interface PathD {
   push_back(_0: PointD): void;
   size(): number;
   get(_0: number): PointD;
+  /** Zero-copy view of contiguous [x0,y0,z0, x1,y1,z1, ...] storage.
+   *  Invalidated by any path mutation or WASM memory growth — read immediately. */
+  view(): Float64Array;
+  /** Bulk replace contents from a flat [x,y,z,...] Float64Array (length must be multiple of 3).
+   *  Caller must pass a Float64Array; on type mismatch (e.g. BigInt64Array) the path is
+   *  resized first and JS-side .set() then throws, leaving the path zeroed. */
+  assign(_0: Float64Array): void;
   delete(): void;
 }
 
