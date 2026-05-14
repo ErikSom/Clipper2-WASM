@@ -1,15 +1,11 @@
 function PathDToPath64(pathD) {
-	let path = new Module["Path64"]();
-	for (let i = 0; i < pathD.size(); i++) {
-		const p = pathD.get(i);
-
-		const x = typeof p.x !== 'bigint' ? BigInt(Math.round(p.x)) : p.x;
-		const y = typeof p.y !== 'bigint' ? BigInt(Math.round(p.y)) : p.y;
-		const z = typeof p.z !== 'bigint' ? BigInt(Math.round(p.z)) : p.z;
-
-		let point = new Module["Point64"](x,y,z);
-		path["push_back"](point);
+	const src = pathD.view();
+	const dst = new BigInt64Array(src.length);
+	for (let i = 0; i < src.length; i++) {
+		dst[i] = BigInt(Math.round(src[i]));
 	}
+	let path = new Module["Path64"]();
+	path.assign(dst);
 	return path;
 }
 
@@ -21,6 +17,8 @@ function Path64ToPathD(path64) {
 		const p = path64.get(i);
 		let point = new Module["PointD"](Number(p.x), Number(p.y), Number(p.z));
 		path["push_back"](point);
+		point.delete();
+		p.delete();
 	}
 	return path;
 }
@@ -33,6 +31,8 @@ function Paths64ToPathsD(paths64) {
 		const path64 = paths64.get(i);
 		let path = Path64ToPathD(path64);
 		paths["push_back"](path);
+		path.delete();
+		path64.delete();
 	}
 	return paths;
 }
@@ -45,6 +45,8 @@ function PathsDToPaths64(pathsD) {
 		const pathD = pathsD.get(i);
 		let path = PathDToPath64(pathD);
 		paths["push_back"](path);
+		path.delete();
+		pathD.delete();
 	}
 	return paths;
 }

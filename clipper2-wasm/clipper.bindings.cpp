@@ -1,6 +1,7 @@
 #include "clipper2/clipper.core.h"
 #include "clipper2/clipper.h"
 #include <emscripten/bind.h>
+#include <emscripten/val.h>
 
 using namespace emscripten;
 using namespace Clipper2Lib;
@@ -9,6 +10,49 @@ template <typename T>
 void ReversePath(Path<T>& path) {
     std::reverse(path.begin(), path.end());
 }
+
+#ifdef USINGZ
+static_assert(sizeof(Point64) == 3 * sizeof(int64_t),
+              "Path64_view/assign require USINGZ layout: Point64 == {x, y, z}");
+static_assert(sizeof(PointD) == 3 * sizeof(double),
+              "PathD_view/assign require USINGZ layout: PointD == {x, y, z}");
+
+val Path64_view(const Path64& path) {
+    return val(typed_memory_view(path.size() * 3,
+                                 reinterpret_cast<const int64_t*>(path.data())));
+}
+
+val PathD_view(const PathD& path) {
+    return val(typed_memory_view(path.size() * 3,
+                                 reinterpret_cast<const double*>(path.data())));
+}
+
+void Path64_assign(Path64& path, val jsArray) {
+    const unsigned len = jsArray["length"].as<unsigned>();
+    if (len % 3 != 0) {
+        throw std::runtime_error("Path64.assign: array length must be a multiple of 3");
+    }
+    const unsigned n = len / 3;
+    path.resize(n);
+    if (n > 0) {
+        val view(typed_memory_view(n * 3, reinterpret_cast<int64_t*>(path.data())));
+        view.call<void>("set", jsArray);
+    }
+}
+
+void PathD_assign(PathD& path, val jsArray) {
+    const unsigned len = jsArray["length"].as<unsigned>();
+    if (len % 3 != 0) {
+        throw std::runtime_error("PathD.assign: array length must be a multiple of 3");
+    }
+    const unsigned n = len / 3;
+    path.resize(n);
+    if (n > 0) {
+        val view(typed_memory_view(n * 3, reinterpret_cast<double*>(path.data())));
+        view.call<void>("set", jsArray);
+    }
+}
+#endif // USINGZ
 
 
 Clipper64* CreateClipper64(bool preserveCollinear) {
@@ -82,7 +126,12 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .function("size", &Path64::size)
         .function("clear", &Path64::clear)
         .function("push_back", select_overload<void(const Point64&)>(&Path64::push_back))
-        .function("get", select_overload<Point64&(size_t)>(&Path64::operator[]), allow_raw_pointers());
+        .function("get", select_overload<Point64&(size_t)>(&Path64::operator[]), allow_raw_pointers())
+#ifdef USINGZ
+        .function("view", &Path64_view)
+        .function("assign", &Path64_assign)
+#endif
+        ;
 
 	// Paths64
 	class_<Paths64>("Paths64")
@@ -201,7 +250,12 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .function("size", &PathD::size)
         .function("clear", &PathD::clear)
         .function("push_back", select_overload<void(const PointD&)>(&PathD::push_back))
-        .function("get", select_overload<PointD&(size_t)>(&PathD::operator[]), allow_raw_pointers());
+        .function("get", select_overload<PointD&(size_t)>(&PathD::operator[]), allow_raw_pointers())
+#ifdef USINGZ
+        .function("view", &PathD_view)
+        .function("assign", &PathD_assign)
+#endif
+        ;
 
 	// PathsD
 	class_<PathsD>("PathsD")

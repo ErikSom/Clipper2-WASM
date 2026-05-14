@@ -6,77 +6,190 @@
 	<title>Clipper1 vs Clipper2 Benchmark</title>
 	<script src="./testPolyOperation.js"></script>
 	<script src="./circlePath.js"></script>
-
+	<style>
+		body { font: 14px/1.4 -apple-system, system-ui, sans-serif; margin: 24px; max-width: 960px; color: #111; }
+		h1 { margin: 0 0 4px; font-size: 20px; }
+		.subtitle { color: #6b7280; font-size: 13px; margin-bottom: 16px; }
+		.controls { display: flex; gap: 16px; align-items: flex-end; padding: 12px; background: #f4f4f5; border-radius: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+		.controls label.input { display: flex; flex-direction: column; font-size: 12px; color: #555; }
+		.controls input[type=number] { font: 14px ui-monospace, SFMono-Regular, Menlo, monospace; padding: 4px 6px; width: 110px; border: 1px solid #d1d5db; border-radius: 4px; }
+		.cliptypes { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+		.cliptypes strong { font-size: 12px; color: #555; font-weight: normal; margin-bottom: 2px; }
+		.cliptypes label { font-weight: normal; }
+		button { padding: 6px 16px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+		button:disabled { opacity: 0.5; cursor: not-allowed; }
+		button.secondary { background: #e5e7eb; color: #111; }
+		.status { color: #6b7280; font-size: 13px; margin-left: 4px; align-self: center; }
+		.status .running { color: #2563eb; }
+		table { border-collapse: collapse; width: 100%; font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+		th, td { padding: 6px 10px; border-bottom: 1px solid #e5e5e5; text-align: right; }
+		th:first-child, td:first-child { text-align: left; font-family: -apple-system, system-ui, sans-serif; }
+		th { background: #fafafa; font-weight: 600; font-family: -apple-system, system-ui, sans-serif; font-size: 12px; color: #555; text-transform: uppercase; letter-spacing: 0.03em; }
+		.delta-good { color: #15803d; font-weight: 600; }
+		.delta-bad { color: #b91c1c; font-weight: 600; }
+		tbody tr:hover { background: #fafafa; }
+		.run-separator td { border-top: 2px solid #d1d5db; padding-top: 10px; }
+		.run-separator td:first-child { color: #6b7280; font-size: 12px; }
+	</style>
 </head>
 <body>
+	<h1>Clipper1 vs Clipper2 Benchmark</h1>
+	<div class="subtitle">Two intersecting circle paths, repeated N times. Δ shows clipper2 improvement over clipper1 (positive = faster).</div>
+
+	<div class="controls">
+		<label class="input">Ops <input type="number" id="ops" value="5000" min="1" step="500"></label>
+		<label class="input">Points <input type="number" id="points" value="5000" min="3" step="500"></label>
+		<div class="cliptypes">
+			<strong>Clip types</strong>
+			<label><input type="checkbox" class="cliptype" value="Intersection" checked> Intersection</label>
+			<label><input type="checkbox" class="cliptype" value="Union" checked> Union</label>
+			<label><input type="checkbox" class="cliptype" value="Difference" checked> Difference</label>
+			<label><input type="checkbox" class="cliptype" value="Xor" checked> Xor</label>
+		</div>
+		<button id="run" disabled>Run</button>
+		<button id="clear" class="secondary">Clear</button>
+		<span class="status" id="status">Loading WASM…</span>
+	</div>
+
+	<table id="results">
+		<thead>
+			<tr>
+				<th>Clip Type</th>
+				<th>Ops</th>
+				<th>Points</th>
+				<th>clipper1 (ms)</th>
+				<th>clipper2 (ms)</th>
+				<th>Δ</th>
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+
 	<script type="module">
 		import * as clipperLib from "https://cdn.jsdelivr.net/npm/js-angusj-clipper@1.3.1/web/+esm";
 		import Clipper2ZFactory from "../../dist/es/clipper2z.js";
 
-		const promises = [
+		const statusEl = document.getElementById('status');
+		const runBtn = document.getElementById('run');
+		const clearBtn = document.getElementById('clear');
+		const opsInput = document.getElementById('ops');
+		const pointsInput = document.getElementById('points');
+		const tbody = document.querySelector('#results tbody');
+
+		const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+		const setStatus = (html, running = false) => {
+			statusEl.innerHTML = running ? `<span class="running">${html}</span>` : html;
+		};
+
+		setStatus('Loading WASM…', true);
+
+		const [clipper1, Clipper2Z] = await Promise.all([
 			clipperLib.loadNativeClipperLibInstanceAsync(clipperLib.NativeClipperLibRequestedFormat.WasmWithAsmJsFallback),
-			Clipper2ZFactory({locateFile:()=>'../../dist/es/clipper2z.wasm'})
-		];
+			Clipper2ZFactory({ locateFile: () => '../../dist/es/clipper2z.wasm' })
+		]);
 
-		Promise.all(promises).then(([clipper, Clipper2Z]) => {
-			const libs = [
-				{ name: "clipper1",
-				  clipper,
-				},
-				{ name: "clipper2",
-				  clipper: Clipper2Z,
+		// Output Paths64 reused across all clipper2 calls (testPolyOperationClipper2 uses it as the destination).
+		initPolyOperationClipper2(Clipper2Z);
+
+		setStatus('Ready');
+		runBtn.disabled = false;
+
+		// Track input wrappers so we can free them between runs and avoid leaking on re-runs.
+		let lastInputs = null;
+		function freeLastInputs() {
+			if (!lastInputs) return;
+			lastInputs.poly1Paths.delete();
+			lastInputs.poly2Paths.delete();
+			lastInputs = null;
+		}
+
+		function buildInputs(points) {
+			const poly1 = circlePath({ x: 1000, y: 1000 }, 1000, points);
+			const poly2 = circlePath({ x: 2500, y: 1000 }, 1000, points);
+			const poly1ArrayInt = poly1.map(p => [p.x, p.y]).flat();
+			const poly2ArrayInt = poly2.map(p => [p.x, p.y]).flat();
+
+			const poly1Paths = new Clipper2Z.Paths64();
+			const poly2Paths = new Clipper2Z.Paths64();
+			const p1 = Clipper2Z.MakePath64(poly1ArrayInt);
+			poly1Paths.push_back(p1);
+			p1.delete();
+			const p2 = Clipper2Z.MakePath64(poly2ArrayInt);
+			poly2Paths.push_back(p2);
+			p2.delete();
+
+			return { poly1, poly2, poly1Paths, poly2Paths };
+		}
+
+		function appendRow({ clipType, ops, points, c1ms, c2ms, isFirstOfRun }) {
+			const delta = ((c1ms - c2ms) / c1ms) * 100;
+			const deltaClass = delta >= 0 ? 'delta-good' : 'delta-bad';
+			const sign = delta >= 0 ? '+' : '';
+			const rowClass = isFirstOfRun && tbody.children.length > 0 ? 'run-separator' : '';
+			const row = document.createElement('tr');
+			if (rowClass) row.className = rowClass;
+			row.innerHTML = `
+				<td>${clipType}</td>
+				<td>${ops.toLocaleString()}</td>
+				<td>${points.toLocaleString()}</td>
+				<td>${c1ms.toFixed(1)}</td>
+				<td>${c2ms.toFixed(1)}</td>
+				<td class="${deltaClass}">${sign}${delta.toFixed(2)}%</td>
+			`;
+			tbody.appendChild(row);
+		}
+
+		async function runBenchmark() {
+			const ops = +opsInput.value;
+			const points = +pointsInput.value;
+			const clipTypes = [...document.querySelectorAll('.cliptype:checked')].map(c => c.value);
+
+			if (!Number.isFinite(ops) || ops < 1) { setStatus('Ops must be ≥ 1'); return; }
+			if (!Number.isFinite(points) || points < 3) { setStatus('Points must be ≥ 3'); return; }
+			if (clipTypes.length === 0) { setStatus('Select at least one clip type'); return; }
+
+			runBtn.disabled = true;
+			clearBtn.disabled = true;
+			opsInput.disabled = true;
+			pointsInput.disabled = true;
+
+			freeLastInputs();
+			lastInputs = buildInputs(points);
+			const { poly1, poly2, poly1Paths, poly2Paths } = lastInputs;
+
+			const fillType = 'EvenOdd';
+			let firstRow = true;
+			for (const clipType of clipTypes) {
+				setStatus(`${clipType} (clipper1) — ${ops.toLocaleString()} ops × ${points.toLocaleString()} pts…`, true);
+				await sleep(0);
+				let start = performance.now();
+				for (let i = 0; i < ops; i++) {
+					testPolyOperationClipper1(clipper1, clipperLib.ClipType[clipType], clipperLib.PolyFillType[fillType], poly1, poly2);
 				}
-			]
+				const c1ms = performance.now() - start;
 
-			for (const benchmark of [
-				{ ops: 5000, points: 5000 },
-				{ ops: 10000, points: 100 },
-			]) {
-
-				const poly1 = circlePath({ x: 1000, y: 1000 }, 1000, benchmark.points);
-				const poly2 = circlePath({ x: 2500, y: 1000 }, 1000, benchmark.points);
-
-				// convert to array of ints
-				const poly1ArrayInt = poly1.map((p) => [p.x, p.y]).flat();
-				const poly2ArrayInt = poly2.map((p) => [p.x, p.y]).flat();
-
-				const poly1Paths = new Clipper2Z.Paths64();
-				const poly2Paths = new Clipper2Z.Paths64();
-				poly1Paths.push_back(Clipper2Z.MakePath64(poly1ArrayInt));
-				poly2Paths.push_back(Clipper2Z.MakePath64(poly2ArrayInt));
-
-				initPolyOperationClipper2(Clipper2Z, poly1Paths, poly2Paths);
-
-				for (const clipType of [
-					"Intersection",
-					"Union",
-					"Difference",
-					"Xor",
-				]) {
-					for (const polyFillType of [
-					"EvenOdd",
-					// "NonZero",
-					// "Negative",
-					// "Positive",
-					]) {
-						for (const lib of libs) {
-							const start = performance.now();
-
-							for (let i = 0; i < benchmark.ops; i++) {
-								if(lib.name === "clipper1"){
-									testPolyOperationClipper1(lib.clipper, clipperLib.ClipType[clipType], clipperLib.PolyFillType[polyFillType], poly1, poly2);
-								} else {
-									testPolyOperationClipper2(lib.clipper, Clipper2Z.ClipType[clipType], Clipper2Z.FillRule[polyFillType], poly1Paths, poly2Paths);
-								}
-							}
-							const end = performance.now();
-
-							console.log(`${lib.name} ${clipType} ${polyFillType} ${benchmark.ops} ops ${benchmark.points} points: ${end - start} ms`);
-						}
-					}
+				setStatus(`${clipType} (clipper2) — ${ops.toLocaleString()} ops × ${points.toLocaleString()} pts…`, true);
+				await sleep(0);
+				start = performance.now();
+				for (let i = 0; i < ops; i++) {
+					testPolyOperationClipper2(Clipper2Z, Clipper2Z.ClipType[clipType], Clipper2Z.FillRule[fillType], poly1Paths, poly2Paths);
 				}
-			};
-		});
+				const c2ms = performance.now() - start;
+
+				appendRow({ clipType, ops, points, c1ms, c2ms, isFirstOfRun: firstRow });
+				firstRow = false;
+				await sleep(0);
+			}
+
+			setStatus(`Done — ${clipTypes.length} clip type(s), ${ops.toLocaleString()} ops × ${points.toLocaleString()} pts`);
+			runBtn.disabled = false;
+			clearBtn.disabled = false;
+			opsInput.disabled = false;
+			pointsInput.disabled = false;
+		}
+
+		runBtn.addEventListener('click', runBenchmark);
+		clearBtn.addEventListener('click', () => { tbody.innerHTML = ''; setStatus('Ready'); });
 	</script>
 </body>
 </html>

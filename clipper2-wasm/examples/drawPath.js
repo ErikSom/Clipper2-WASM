@@ -26,26 +26,16 @@ function drawPath(path, color = 'black', closed = true) {
 	ctx.strokeStyle = color;
 	ctx.beginPath();
 
-	const size = path.size();
+	const v = path.view();
+	if (v.length === 0) return;
 
-	for (let i = 0; i < size; i++) {
-		const point = path.get(i);
-
-		const x = Number(point.x) + offsetX;
-		const y = Number(point.y) + offsetY;
-
-		if (i === 0) {
-			ctx.moveTo(x, y);
-		} else {
-			ctx.lineTo(x, y);
-		}
+	ctx.moveTo(Number(v[0]) + offsetX, Number(v[1]) + offsetY);
+	for (let i = 3; i < v.length; i += 3) {
+		ctx.lineTo(Number(v[i]) + offsetX, Number(v[i + 1]) + offsetY);
 	}
 
-	if(closed){
-		const point = path.get(0);
-		const x = Number(point.x) + offsetX;
-		const y = Number(point.y) + offsetY;
-		ctx.lineTo(x, y);
+	if (closed) {
+		ctx.lineTo(Number(v[0]) + offsetX, Number(v[1]) + offsetY);
 	}
 
 	ctx.stroke();

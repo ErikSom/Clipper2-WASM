@@ -9,7 +9,11 @@ mkdir -p clipper2-wasm/dist/es
 mkdir -p clipper2-wasm/dist/umd
 
 # Common flags
-COMMON_FLAGS="-Iclipper2/CPP/Clipper2Lib/include -DUSINGZ --bind -s MODULARIZE=1 -s WASM_BIGINT -s ALLOW_MEMORY_GROWTH=1 -s EXIT_RUNTIME=0"
+# EXPORTED_RUNTIME_METHODS=['HEAPU8']: required for callers that read
+# Module.HEAPU8.byteLength (bench telemetry). Without it, dev builds with
+# ASSERTIONS=2 abort on access. Stock npm 0.2.1 worked because it shipped a
+# prod build with looser assertion behaviour.
+COMMON_FLAGS="-Iclipper2/CPP/Clipper2Lib/include -DUSINGZ --bind -s MODULARIZE=1 -s WASM_BIGINT -s ALLOW_MEMORY_GROWTH=1 -s EXIT_RUNTIME=0 -s EXPORTED_RUNTIME_METHODS=['HEAPU8']"
 
 # Development build flags
 DEV_FLAGS="-g3 -s ASSERTIONS=2 --source-map-base http://localhost:11009/ -s DISABLE_EXCEPTION_CATCHING=0 -s SAFE_HEAP=1 -O0"
@@ -30,14 +34,14 @@ fi
 
 # build ES6
 echo "Building ES6"
-em++ $FLAGS -s EXPORT_ES6=1 -s NO_FILESYSTEM=1 -s ENVIRONMENT='web' -s clipper2-wasm/clipper.bindings.cpp clipper2/CPP/build/libClipper2Z.a -o clipper2-wasm/dist/es/clipper2z.js -s EXPORT_NAME="Clipper2Z" --post-js clipper2-wasm/glue-stub-z.js
+em++ $FLAGS -s EXPORT_ES6=1 -s NO_FILESYSTEM=1 -s ENVIRONMENT='web,worker,node' -s clipper2-wasm/clipper.bindings.cpp clipper2/CPP/build/libClipper2Z.a -o clipper2-wasm/dist/es/clipper2z.js -s EXPORT_NAME="Clipper2Z" --post-js clipper2-wasm/glue-stub-z.js
 
 # build Tools ES6
-em++ $FLAGS -Iclipper2/CPP/Utils -s EXPORT_ES6=1 -s ENVIRONMENT='web' -s clipper2-wasm/clipper-tools.bindings.cpp clipper2/CPP/build/libClipper2Zutils.a clipper2/CPP/build/libClipper2Z.a -o clipper2-wasm/dist/es/clipper2z-utils.js -s EXPORT_NAME="Clipper2ZUtils" -s EXPORTED_FUNCTIONS=[FS] --post-js clipper2-wasm/glue-stub-tools-z.js
+em++ $FLAGS -Iclipper2/CPP/Utils -s EXPORT_ES6=1 -s ENVIRONMENT='web,worker,node' -s clipper2-wasm/clipper-tools.bindings.cpp clipper2/CPP/build/libClipper2Zutils.a clipper2/CPP/build/libClipper2Z.a -o clipper2-wasm/dist/es/clipper2z-utils.js -s EXPORT_NAME="Clipper2ZUtils" -s EXPORTED_FUNCTIONS=[FS] --post-js clipper2-wasm/glue-stub-tools-z.js
 
 # build UMD
 echo "Building UMD"
-em++ $FLAGS -s NO_FILESYSTEM=1 clipper2-wasm/clipper.bindings.cpp clipper2/CPP/build/libClipper2Z.a -o clipper2-wasm/dist/umd/clipper2z.js -s ENVIRONMENT='web' -s EXPORT_NAME="Clipper2ZFactory" --post-js clipper2-wasm/glue-stub-z.js
+em++ $FLAGS -s NO_FILESYSTEM=1 clipper2-wasm/clipper.bindings.cpp clipper2/CPP/build/libClipper2Z.a -o clipper2-wasm/dist/umd/clipper2z.js -s ENVIRONMENT='web,worker,node' -s EXPORT_NAME="Clipper2ZFactory" --post-js clipper2-wasm/glue-stub-z.js
 
 # build Tools UMD
-em++ $FLAGS -Iclipper2/CPP/Utils clipper2-wasm/clipper-tools.bindings.cpp clipper2/CPP/build/libClipper2Zutils.a clipper2/CPP/build/libClipper2Z.a -o clipper2-wasm/dist/umd/clipper2z-utils.js -s ENVIRONMENT='web' -s EXPORT_NAME="Clipper2ZUtilsFactory" -s EXPORTED_FUNCTIONS=[FS] --post-js clipper2-wasm/glue-stub-tools-z.js
+em++ $FLAGS -Iclipper2/CPP/Utils clipper2-wasm/clipper-tools.bindings.cpp clipper2/CPP/build/libClipper2Zutils.a clipper2/CPP/build/libClipper2Z.a -o clipper2-wasm/dist/umd/clipper2z-utils.js -s ENVIRONMENT='web,worker,node' -s EXPORT_NAME="Clipper2ZUtilsFactory" -s EXPORTED_FUNCTIONS=[FS] --post-js clipper2-wasm/glue-stub-tools-z.js

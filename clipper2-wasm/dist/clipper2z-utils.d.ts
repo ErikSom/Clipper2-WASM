@@ -33,6 +33,8 @@ export interface PathD {
   push_back(_0: PointD): void;
   size(): number;
   get(_0: number): PointD;
+  view(): Float64Array;
+  assign(_0: Float64Array): void;
   delete(): void;
 }
 

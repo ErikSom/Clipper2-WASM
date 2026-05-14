@@ -3,8 +3,6 @@ export interface Clipper2ZFactoryFunction extends EmscriptenModuleFactory<MainMo
 
 export interface ClipperBase {
   Clear(): void;
-  Clear(): void;
-  Clear(): void;
   SetPreserveCollinear(_0: boolean): void;
   GetPreserveCollinear(): boolean;
   delete(): void;
@@ -53,6 +51,8 @@ export interface Path64 {
   push_back(_0: Point64): void;
   size(): number;
   get(_0: number): Point64;
+  view(): BigInt64Array;
+  assign(_0: BigInt64Array): void;
   delete(): void;
 }
 
@@ -121,6 +121,8 @@ export interface PathD {
   push_back(_0: PointD): void;
   size(): number;
   get(_0: number): PointD;
+  view(): Float64Array;
+  assign(_0: Float64Array): void;
   delete(): void;
 }
 
