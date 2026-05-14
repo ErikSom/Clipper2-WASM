@@ -1,7 +1,7 @@
 {
-	"name": "@gi-nx/clipper2-wasm",
-	"version": "0.2.2",
-	"description": "Fork of clipper2-wasm with memory-leak fixes in the JS helpers (MakePath64, MakePathD, PathDToPath64, etc.) and updated Emscripten build flags. Drop-in replacement for clipper2-wasm@0.2.1.",
+	"name": "clipper2-wasm",
+	"version": "0.0.9",
+	"description": "WebAssembly port of the Clipper2 library for polygon clipping and offsetting",
 	"module": "dist/es/clipper2z.js",
 	"main": "dist/umd/clipper2z.js",
 	"types": "dist/es/clipper2z.d.ts",
@@ -17,14 +17,11 @@
 		"wasm",
 		"webassembly"
 	],
-	"author": "Erik Sombroek <eriksombroek@gmail.com> (fork maintained by Giraffe)",
+	"author": "Erik Sombroek <eriksombroek@gmail.com>",
 	"license": "BSL-1.0",
 	"files": [
 		"/dist"
 	],
-	"publishConfig": {
-		"access": "public"
-	},
 	"dependencies": {
 		"@types/emscripten": "^1.39.10"
 	}
