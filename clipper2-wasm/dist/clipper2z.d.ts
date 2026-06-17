@@ -66,6 +66,7 @@ export interface Path64 {
   push_back(point: Point64): void;
   size(): number;
   get(index: number): Point64;
+  resize(newSize: number): void;
   view(): BigInt64Array;
   assign(coordinates: BigInt64Array): void;
   delete(): void;
@@ -136,6 +137,7 @@ export interface PathD {
   push_back(point: PointD): void;
   size(): number;
   get(index: number): PointD;
+  resize(newSize: number): void;
   view(): Float64Array;
   assign(coordinates: Float64Array): void;
   delete(): void;
@@ -189,6 +191,21 @@ export interface ClipperD extends ClipperBase {
   delete(): void;
 }
 
+export interface ClipperOffset64 {
+  AddPath(path: Path64, joinType: JoinType, endType: EndType): void;
+  AddPaths(paths: Paths64, joinType: JoinType, endType: EndType): void;
+  Clear(): void;
+  Execute(delta: number, solution: Paths64): void;
+  ExecuteWithCallback(cb: (path: Path64, path_normals: PathD, curr_idx: number, prev_idx: number) => number, solution: Paths64): void;
+  SetDeltaCallback(cb: (path: Path64, path_normals: PathD, curr_idx: number, prev_idx: number) => number): void;
+  miterLimit: number;
+  arcTolerance: number;
+  preserveCollinear: boolean;
+  reverseSolution: boolean;
+  ErrorCode(): number;
+  delete(): void;
+}
+
 export interface MainModule {
   ClipperBase: {};
   FillRule: { EvenOdd: FillRuleValue<0>, NonZero: FillRuleValue<1>, Positive: FillRuleValue<2>, Negative: FillRuleValue<3> };
@@ -232,6 +249,7 @@ export interface MainModule {
   CreateClipper64(preserveCollinear: boolean): Clipper64;
   IsPositiveD(poly: PathD): boolean;
   CreateClipperD(preserveCollinear: boolean): ClipperD;
+  ClipperOffset64: { new(miterLimit?: number, arcTolerance?: number, preserveCollinear?: boolean, reverseSolution?: boolean): ClipperOffset64 };
   EllipseFromRect64(rect: Rect64, steps: number): Path64;
   EllipseFromRectD(rect: RectD, steps: number): PathD;
   RectClipPathsD(rect: RectD, paths: PathsD, precision: number): PathsD;

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Clipper2Z - ES6 - Example Variable Offset</title>
+	<script src="../drawPath.js"></script>
+</head>
+<body>
+	<script type="module">
+		import Clipper2ZFactory from '../../dist/es/clipper2z.js';
+
+		Clipper2ZFactory().then((Clipper2Z) => {
+			initCanvas(500, 500);
+
+			const {
+				ClipperOffset64,
+				Paths64,
+				JoinType, EndType,
+                MakePath64, FillRule
+			} = Clipper2Z;
+
+			/*
+			 * test: gradually scale down the offset to a minimum of 25% of delta
+			 */
+			const delta1 = 10;
+			const subject1 = new Paths64();
+			subject1.push_back(MakePath64([150, 100, 60, 129, 115, 52, 115, 148, 60, 71]))    
+
+			const co1 = new ClipperOffset64(0, 0, false, false);
+			co1.AddPaths(subject1, JoinType.Round, EndType.Round);
+			co1.SetDeltaCallback(function(path, pathNormals, currIdx, prevIdx) {
+				const high = (path.size() - 1) * 1.25;
+				return (high - currIdx) / high * delta1;
+			});
+			const solution1 = new Paths64();
+			co1.Execute(1.0, solution1);
+			co1.delete();
+            
+			drawText("Test: gradual offset", 10, 20);
+			drawPaths(subject1, 'green', false);
+			drawPaths(solution1, 'purple');
+			subject1.delete();
+			solution1.delete();
+
+
+		});
+	</script>
+</body>
+</html>

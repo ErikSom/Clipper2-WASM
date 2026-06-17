@@ -1,5 +1,6 @@
 #include "clipper2/clipper.core.h"
 #include "clipper2/clipper.h"
+#include "clipper2/clipper.offset.h"
 #include "clipper2/clipper.triangulation.h"
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
@@ -90,6 +91,34 @@ ClipperD* CreateClipperD(bool preserveCollinear) {
     return clipper;
 }
 
+// Wrapper for ClipperOffset delta callback from JavaScript
+void ClipperOffset_SetDeltaCallback(ClipperOffset& co, val jsCallback) {
+    co.SetDeltaCallback(
+        [jsCallback](const Path64& path, const PathD& path_normals, size_t curr_idx, size_t prev_idx) -> double {
+            return jsCallback(
+                val(path),
+                val(path_normals),
+                val(static_cast<double>(curr_idx)),
+                val(static_cast<double>(prev_idx))
+            ).as<double>();
+        }
+    );
+}
+
+void ClipperOffset_ExecuteCallback(ClipperOffset& co, val jsCallback, Paths64& solution) {
+    co.Execute(
+        [jsCallback](const Path64& path, const PathD& path_normals, size_t curr_idx, size_t prev_idx) -> double {
+            return jsCallback(
+                val(path),
+                val(path_normals),
+                val(static_cast<double>(curr_idx)),
+                val(static_cast<double>(prev_idx))
+            ).as<double>();
+        },
+        solution
+    );
+}
+
 EMSCRIPTEN_BINDINGS(clipper_module) {
         class_<ClipperBase>("ClipperBase")
         .function("Clear", &ClipperBase::Clear)
@@ -162,6 +191,7 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .constructor<>()
         .function("size", &Path64::size)
         .function("clear", &Path64::clear)
+        .function("resize(newSize)", select_overload<void(size_t)>(&Path64::resize))
         .function("push_back(point)", select_overload<void(const Point64&)>(&Path64::push_back))
         .function("get(index)", select_overload<Point64&(size_t)>(&Path64::operator[]), allow_raw_pointers())
 #ifdef USINGZ
@@ -234,6 +264,21 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         // Offset
         function("InflatePaths64(paths, delta, joinType, endType, miterLimit, arcTolerance)", select_overload<Paths64(const Paths64&, double, JoinType, EndType, double, double)>(&InflatePaths), allow_raw_pointers());
 
+        // ClipperOffset64
+        class_<ClipperOffset>("ClipperOffset64")
+        .constructor<double, double, bool, bool>()
+        .function("AddPath(path, joinType, endType)", &ClipperOffset::AddPath, allow_raw_pointers())
+        .function("AddPaths(paths, joinType, endType)", &ClipperOffset::AddPaths, allow_raw_pointers())
+        .function("Clear", &ClipperOffset::Clear)
+        .function("Execute(delta, solution)", select_overload<void(double, Paths64&)>(&ClipperOffset::Execute), allow_raw_pointers())
+        .function("SetDeltaCallback(cb)", &ClipperOffset_SetDeltaCallback, allow_raw_pointers())
+        .function("ExecuteWithCallback(cb, solution)", &ClipperOffset_ExecuteCallback, allow_raw_pointers())
+        .property("miterLimit", select_overload<double() const>(&ClipperOffset::MiterLimit), select_overload<void(double)>(&ClipperOffset::MiterLimit))
+        .property("arcTolerance", select_overload<double() const>(&ClipperOffset::ArcTolerance), select_overload<void(double)>(&ClipperOffset::ArcTolerance))
+        .property("preserveCollinear", select_overload<bool() const>(&ClipperOffset::PreserveCollinear), select_overload<void(bool)>(&ClipperOffset::PreserveCollinear))
+        .property("reverseSolution", select_overload<bool() const>(&ClipperOffset::ReverseSolution), select_overload<void(bool)>(&ClipperOffset::ReverseSolution))
+        .function("ErrorCode", &ClipperOffset::ErrorCode);
+
         // Simplify
         function("SimplifyPath64(path, epsilon, isClosedPath)", select_overload<Path64(const Path64&, double, bool)>(&SimplifyPath), allow_raw_pointers());
         function("SimplifyPaths64(paths, epsilon, isClosedPath)", select_overload<Paths64(const Paths64&, double, bool)>(&SimplifyPaths), allow_raw_pointers());
@@ -289,6 +334,7 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .constructor<>()
         .function("size", &PathD::size)
         .function("clear", &PathD::clear)
+        .function("resize(newSize)", select_overload<void(size_t)>(&PathD::resize))
         .function("push_back(point)", select_overload<void(const PointD&)>(&PathD::push_back))
         .function("get(index)", select_overload<PointD&(size_t)>(&PathD::operator[]), allow_raw_pointers())
 #ifdef USINGZ
